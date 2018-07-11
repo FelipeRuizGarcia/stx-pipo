@@ -1,17 +1,12 @@
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-clients && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-clients/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-config && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-config/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-fault && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-fault/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-gplv2 && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-gplv2/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-gplv3 && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-gplv3/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-gui && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-gui/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-ha && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-ha/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-integ && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-integ/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-manifest && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-manifest/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-metal && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-metal/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-nfv && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-nfv/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-root && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-root/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-tis-repo && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-tis-repo/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-tools && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-tools/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-update && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-update/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-upstream && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-upstream/.git/hooks/
-git clone ssh://pipo@review.openstack.org:29418/openstack/stx-utils && scp -p -P 29418 pipo@review.openstack.org:hooks/commit-msg stx-utils/.git/hooks/
+#!/bin/bash
+
+page_stx="stx"
+wget https://git.openstack.org/cgit/?q=stx -O $page_stx
+
+repos=$(grep "openstack/stx-" $page_stx | awk -F 'title=' '{print $2}' | awk -F "'" '{print $2}' | awk -F "/" '{print $2}' )
+
+for repo in $repos; do
+	git clone https://git.openstack.org/openstack/$repo && (cd $repo && curl -kLo `git rev-parse --git-dir`/hooks/commit-msg https://git.openstack.org/tools/hooks/commit-msg; chmod +x `git rev-parse --git-dir`/hooks/commit-msg)
+done
+
+rm $page_stx
