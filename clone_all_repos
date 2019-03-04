@@ -1,15 +1,38 @@
 #!/bin/bash
 
+DIR_BASE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )")"
+DIR_REPOS="$DIR_BASE/repos"
+
+mkdir -p $DIR_REPOS
+
+if [ -d stx-root ]
+then
+	echo "moving stx repos to $DIR_REPOS"
+	mv stx-* $DIR_REPOS
+fi
+
+cd $DIR_REPOS
+
 page_stx="stx"
 wget https://git.openstack.org/cgit/?q=stx -O $page_stx
 
 repos=$(grep "openstack/stx-" $page_stx | awk -F 'title=' '{print $2}' | awk -F "'" '{print $2}' | awk -F "/" '{print $2}' )
 
 for repo in $repos; do
-	git clone https://git.openstack.org/openstack/$repo && (cd $repo && curl -kLo `git rev-parse --git-dir`/hooks/commit-msg https://git.openstack.org/tools/hooks/commit-msg; chmod +x `git rev-parse --git-dir`/hooks/commit-msg)
+
+	cd $DIR_REPOS
+	echo "checking $repo"
+
+	if [ -d $repo ]
+	then
+		cd $repo
+		echo "repo exists $repo"
+		git pull
+	else
+		echo "cloning repo $repo"
+		git clone https://git.openstack.org/openstack/$repo && (cd $repo && curl -kLo `git rev-parse --git-dir`/hooks/commit-msg https://git.openstack.org/tools/hooks/commit-msg; chmod +x `git rev-parse --git-dir`/hooks/commit-msg)
+	fi
 done
 
-rm $page_stx
+rm $DIR_REPOS/$page_stx
 
-mkdir repos
-mv stx-* repos
